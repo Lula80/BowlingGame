@@ -1,0 +1,42 @@
+#Server configuration
+server:
+  servlet:
+    context-path: '/bowling-api'
+#
+#Datasource configuration
+#spring.profiles.active:container192.168.99.100:
+spring:
+  application:
+    name: BowlingApplication
+
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/gamedb #jdbc:tc:postgresql:17.0.0:///gamedb #
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    initialization-mode: always
+    jpa:
+      hibernate:
+        ddl-auto: create-drop
+      show-sql: true
+  security:
+    user.name:postgres
+    user.password:postgres
+  #Flyway configuration
+  flyway:
+    baseline-on-migrate : true
+    clean-disabled: false
+  management:
+    endpoints:
+      web:
+        exposure:
+          include:*
+#
+#Logging configuration
+logging:
+  level.org.springframework.security:DEBUG
+  logging.level.org.flywaydb:DEBUG
+
+
+

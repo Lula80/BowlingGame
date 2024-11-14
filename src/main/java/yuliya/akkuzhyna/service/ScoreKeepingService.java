@@ -51,15 +51,15 @@ public class ScoreKeepingService {
     public List<FrameDto> getUpdatedFrames(int i, List<Integer> pins, long userId) throws FrameClosedException {
 
        validateState(i, pins);
-
-        var pinsToDo= (isLastFrame(i) && !framesQueue.isEmpty())? getFinalRollsToDo() * PINS_PER_FRAME: PINS_PER_FRAME;
+        var isBonusFrame = isLastFrame(i);
+        var pinsToDo= (isBonusFrame && !framesQueue.isEmpty())? getFinalRollsToDo() * PINS_PER_FRAME: PINS_PER_FRAME;
         var current = Frame.initFrame( i , pinsToDo, pins);
 
         current.addPrevClosedScore(
-                    getRecentClosedScore(framesQueue, isLastFrame(i)?getFinalRollsToDo():current.getRollsMade(), current.getPinsDown(), userId));
+                    getRecentClosedScore(framesQueue, isBonusFrame?getFinalRollsToDo():current.getRollsMade(), current.getPinsDown(), userId));
         framesQueue.offer(current);
 
-        if(!isLastFrame(i))
+        if(!isBonusFrame)
             eventPublisher.publishEvent(new BordUpdateEvent( current, true, userId));
 
         return bordService.getJsonFrames(userId);
@@ -73,7 +73,7 @@ public class ScoreKeepingService {
             throw new IllegalArgumentException("Invalid number of rolls "+ pins.size());
     }
 
-    private static boolean isLastFrame(int i) {
+    private static boolean isBonusFrame(int i) {
         return i == NUM_FRAMES + 1;
     }
 

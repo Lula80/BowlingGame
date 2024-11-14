@@ -20,7 +20,7 @@ public class ScoreBordService implements ApplicationListener<BordUpdateEvent> {
     @Override
     public void onApplicationEvent(BordUpdateEvent event) {
         if (event.isNewFrame())
-            mapPlayerToFrames.get(event.getPlayerId()).add(mapToDto(event.getFrame()));
+            mapPlayerToFrames.get(event.getPlayerId()).add(event.getFrame());
         else {
             updateClosedFrameOnBord(event.getFrame(), event.getPlayerId());
         }
@@ -28,8 +28,8 @@ public class ScoreBordService implements ApplicationListener<BordUpdateEvent> {
             mapPlayerToScore.put(event.getPlayerId(), event.getFrame().getScore());
     }
 
-    private void updateClosedFrameOnBord( Frame f, Long id){
-        FrameDto frameDto = mapPlayerToFrames.get(id).get(f.getIdx()-1);
+    private void updateClosedFrameOnBord( FrameDto f, Long id){
+        FrameDto frameDto = mapPlayerToFrames.get(id).get(f.getIndex()-1);
         frameDto.setClosed(f.isClosed());
         frameDto.setScore(f.getScore());
     }
@@ -47,10 +47,6 @@ public class ScoreBordService implements ApplicationListener<BordUpdateEvent> {
     }
 
 
-    private static FrameDto mapToDto(Frame current) {
-        return FrameDto.builder().score(current.getScore()).closed(current.isClosed())
-                .index(current.getIdx()).bonusRollsNum(current.getRollsToDo()).build();
-    }
     public void resetBord(long userId){
         mapPlayerToFrames.clear();
         mapPlayerToFrames.put(userId, new ArrayList<>(Constants.NUM_FRAMES));

@@ -59,9 +59,14 @@ public class ScoreKeepingService {
         framesQueue.offer(current);
 
         if(!isBonusFrame)
-            eventPublisher.publishEvent(new BordUpdateEvent( current, true, userId));
+            eventPublisher.publishEvent(new BordUpdateEvent( mapToDto(current), true, userId));
 
         return bordService.getJsonFrames(userId);
+    }
+
+    private static FrameDto mapToDto(Frame current) {
+        return FrameDto.builder().score(current.getScore()).closed(current.isClosed())
+                .index(current.getIdx()).bonusRollsNum(current.getRollsToDo()).build();
     }
 
     private void validateState(int i, List<Integer> pins) {
@@ -112,7 +117,7 @@ public class ScoreKeepingService {
             if (f.isClosed()) {
                 finalScores.add(f.printScore());
                 firstClosedScore = f.getScore();
-                eventPublisher.publishEvent(new BordUpdateEvent(f, false, userId));
+                eventPublisher.publishEvent(new BordUpdateEvent(mapToDto(f), false, userId));
 
                 it.remove();
             }

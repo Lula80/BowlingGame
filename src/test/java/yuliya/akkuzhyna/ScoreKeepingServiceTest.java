@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.util.ReflectionTestUtils;
 import yuliya.akkuzhyna.exception.FrameClosedException;
+import yuliya.akkuzhyna.persistence.Player;
 import yuliya.akkuzhyna.service.BoardUpdateEvent;
 import yuliya.akkuzhyna.service.Frame;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
@@ -15,17 +15,18 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 
 class ScoreKeepingServiceTest {
     @Autowired
     private final ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
-    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher);//, Mockito.mock(ScoreBoardService.class));
-
+    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher);
+    private final long boardId = 0L;
+    private final Player testPlayer =  Mockito.mock(Player.class);
     @BeforeEach
     void setUp() {
        doNothing().when(eventPublisher).publishEvent(BoardUpdateEvent.class);
-        ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.eventPublisher, eventPublisher);
 
     }
 
@@ -38,8 +39,9 @@ class ScoreKeepingServiceTest {
         framesQueue.add(f);
         framesQueue.add(f2);
         framesQueue.element().decrementRollsToDo();
-
-        int lastClosed = scoringService.getLastClosedScore(framesQueue, generateSpare());
+        when(testPlayer.getFramesQueue()).thenReturn(framesQueue);
+        Frame current = generateSpare();
+        int lastClosed = scoringService.getRecentClosedScore(testPlayer,  current.getRollsMade(), current.getPinsDown(), boardId);
         assertEquals( 41, lastClosed);
         assertEquals(0, framesQueue.size());
     }
@@ -53,7 +55,9 @@ class ScoreKeepingServiceTest {
         framesQueue.add(f);
         framesQueue.add(f2);
         framesQueue.element().decrementRollsToDo();
-        int lastClosed = scoringService.getLastClosedScore(framesQueue, generateStrike());
+        when(testPlayer.getFramesQueue()).thenReturn(framesQueue);
+        Frame current = generateStrike();
+        int lastClosed = scoringService.getRecentClosedScore(testPlayer,  current.getRollsMade(), current.getPinsDown(), boardId);
         assertEquals( 0, lastClosed);
         assertEquals( 1, framesQueue.size());
         assertEquals(1, framesQueue.element().getRollsToDo());
@@ -69,7 +73,9 @@ class ScoreKeepingServiceTest {
         framesQueue.add(f);
         framesQueue.add(f2);
         framesQueue.element().decrementRollsToDo();
-        int lastClosed = scoringService.getLastClosedScore(framesQueue, generateMiss());
+        when(testPlayer.getFramesQueue()).thenReturn(framesQueue);
+        Frame current = generateMiss();
+        int lastClosed = scoringService.getRecentClosedScore(testPlayer,  current.getRollsMade(), current.getPinsDown(), boardId);
         assertEquals( 30, lastClosed);
         assertEquals(0, framesQueue.size());
     }
@@ -83,7 +89,9 @@ class ScoreKeepingServiceTest {
         framesQueue.add(f);
         framesQueue.add(f2);
         framesQueue.element().decrementRollsToDo();
-        int lastClosed = scoringService.getLastClosedScore(framesQueue, generateNormal());
+        when(testPlayer.getFramesQueue()).thenReturn(framesQueue);
+        Frame current = generateNormal();
+        int lastClosed = scoringService.getRecentClosedScore(testPlayer,  current.getRollsMade(), current.getPinsDown(), boardId);
         assertEquals( 33, lastClosed);
         assertEquals(0, framesQueue.size());
     }
@@ -93,7 +101,9 @@ class ScoreKeepingServiceTest {
         Queue<Frame> framesQueue = new LinkedList<>();
         Frame f = generateSpare();
         framesQueue.add(f);
-        int lastClosed = scoringService.getLastClosedScore(framesQueue, generateNormal());//1, 1);
+        when(testPlayer.getFramesQueue()).thenReturn(framesQueue);
+        Frame current = generateNormal();
+        int lastClosed = scoringService.getRecentClosedScore(testPlayer,  current.getRollsMade(), current.getPinsDown(), boardId);
         assertEquals( 11, lastClosed);
         assertEquals(0, framesQueue.size());
     }
@@ -103,7 +113,9 @@ class ScoreKeepingServiceTest {
         Queue<Frame> framesQueue = new LinkedList<>();
         Frame f = generateSpare();
         framesQueue.add(f);
-        int lastClosed = scoringService.getLastClosedScore(framesQueue, generateFoul());
+        when(testPlayer.getFramesQueue()).thenReturn(framesQueue);
+        Frame current = generateFoul();
+        int lastClosed = scoringService.getRecentClosedScore(testPlayer,  current.getRollsMade(), current.getPinsDown(), boardId);
         assertEquals( 10, lastClosed);
         assertEquals(0, framesQueue.size());
     }

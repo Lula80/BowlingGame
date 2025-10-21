@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.util.ReflectionTestUtils;
 import yuliya.akkuzhyna.dto.FrameDto;
 import yuliya.akkuzhyna.exception.FrameClosedException;
+import yuliya.akkuzhyna.persistence.Player;
 import yuliya.akkuzhyna.service.Frame;
 import yuliya.akkuzhyna.service.ScoreBoardService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
@@ -29,14 +29,14 @@ class ScoreKeepingServiceIT {
     private  ScoreBoardService boardService;
     @Autowired
     private  ApplicationEventPublisher eventPublisher;
-    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher);//, boardService);
+    @Autowired
+    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher);
     private final long boardId = 0L;
+    private final Player testPlayer = new Player(1L, "Jane");
 
     @BeforeEach
     void setUp() {
-   //     ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.boardService, bordService);
-        ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.eventPublisher, eventPublisher);
-        boardService.resetBoard(boardId,1l, 1);
+        boardService.resetBoard(boardId, testPlayer.getId(), 1);
     }
 
     @Test
@@ -52,7 +52,7 @@ class ScoreKeepingServiceIT {
 
     @Test
     void testInvalidFrameState2() {
-        assertThrows(IndexOutOfBoundsException.class, () -> scoringService.addUpdateFrames(13, List.of(3, 5), 0l,1l));
+        assertThrows(IndexOutOfBoundsException.class, () -> scoringService.addUpdateFrames(13, List.of(3, 5), testPlayer, boardId));
     }
 
     @Test
@@ -62,7 +62,7 @@ class ScoreKeepingServiceIT {
         var i = testRollsInLoop(pins, expected);
         assertFalse(frames.getLast().isClosed());
         testBonusFrame(i / ROLLS_PER_FRAME + 1, pins.subList(i, i + ROLLS_PER_FRAME), expected);
-        assertEquals(List.of(21, 41, 53, 57, 63, 83, 113, 140, 160, 180), scoringService.getFinalScores());
+        assertEquals(List.of(21, 41, 53, 57, 63, 83, 113, 140, 160, 180), testPlayer.getFinalScores());
 
     }
 
@@ -73,7 +73,7 @@ class ScoreKeepingServiceIT {
         var i = testRollsInLoop(pins, expected);
         assertFalse(frames.getLast().isClosed());
         testBonusFrame(i / ROLLS_PER_FRAME + 1, pins.subList(i, i + ROLLS_PER_FRAME), expected);
-        assertEquals(List.of(20, 39, 48, 68, 97, 116, 125, 145, 165, 185), scoringService.getFinalScores());
+        assertEquals(List.of(20, 39, 48, 68, 97, 116, 125, 145, 165, 185), testPlayer.getFinalScores());
     }
 
    @Test
@@ -83,7 +83,7 @@ class ScoreKeepingServiceIT {
        var i = testRollsInLoop(pins, expectedTotals);
        assertFalse(frames.getLast().isClosed());
        testBonusFrame(i / ROLLS_PER_FRAME + 1, pins.subList(i, i + ROLLS_PER_FRAME), expectedTotals);
-        assertEquals( List.of(20, 39, 48, 52, 58, 78, 108, 138, 168, 198), scoringService.getFinalScores());
+        assertEquals( List.of(20, 39, 48, 52, 58, 78, 108, 138, 168, 198), testPlayer.getFinalScores());
     }
 
     @Test
@@ -94,7 +94,7 @@ class ScoreKeepingServiceIT {
         assertFalse(frames.getLast().isClosed());
        //test last frame with bonus rolls
         testBonusFrame(i / ROLLS_PER_FRAME +1, pins.subList(i, pins.size()),expectedTotals);
-        assertEquals(List.of(30, 60, 90, 120, 150, 180, 210, 240, 270, 300), scoringService.getFinalScores());
+        assertEquals(List.of(30, 60, 90, 120, 150, 180, 210, 240, 270, 300), testPlayer.getFinalScores());
     }
 
     @Test
@@ -104,7 +104,7 @@ class ScoreKeepingServiceIT {
         var i = testRollsInLoop(pins, expectedTotals);
         assertFalse(frames.getLast().isClosed());
         testBonusFrame(i / ROLLS_PER_FRAME + 1, pins.subList(i, i + ROLLS_PER_FRAME), expectedTotals);
-        assertEquals(List.of(30, 60, 90, 120, 150, 180, 210, 240, 270, 290), scoringService.getFinalScores());
+        assertEquals(List.of(30, 60, 90, 120, 150, 180, 210, 240, 270, 290), testPlayer.getFinalScores());
     }
 
     @Test
@@ -114,22 +114,22 @@ class ScoreKeepingServiceIT {
         var rollsNum = NUM_FRAMES * ROLLS_PER_FRAME;
         int i;
         for (i=0; i < rollsNum; i += ROLLS_PER_FRAME) {
-            scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME), 1l,boardId);
-            var bord = boardService.getUpdateBoard(1L,boardId);
+            scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME), testPlayer, boardId);
+            var bord = boardService.getUpdatedBoard(testPlayer.getId(), boardId, testPlayer.getName());
             frames = bord.frameDtos();
             System.out.println("Bord "+ bord);
         }
 
         if(!frames.getLast().isClosed()){
-            scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME),1l, boardId);
-            var bord = boardService.getUpdateBoard(1L, boardId);
+            scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME), testPlayer, boardId);
+            var bord = boardService.getUpdatedBoard(1L, boardId, testPlayer.getName());
             System.out.println("Board "+ bord);
         }
 
 
-        assertEquals(expectedScore(input.subList(0,6)), scoringService.getFinalScores().get(0) );
-        assertEquals(scoringService.getFinalScores().get(0) + expectedScore(input.subList(2,8)),scoringService.getFinalScores().get(1));
-        assertEquals( scoringService.getFinalScores().get(6)+expectedScore(input.subList(14,20)), scoringService.getFinalScores().get(7));
+        assertEquals(expectedScore(input.subList(0,6)), testPlayer.getFinalScores().get(0) );
+        assertEquals(testPlayer.getFinalScores().get(0) + expectedScore(input.subList(2,8)), testPlayer.getFinalScores().get(1));
+        assertEquals( testPlayer.getFinalScores().get(6)+expectedScore(input.subList(14,20)), testPlayer.getFinalScores().get(7));
     }
 
     /**
@@ -138,7 +138,7 @@ class ScoreKeepingServiceIT {
      * @return list of random number ,each less than upperBound
      * each pair of numbers is in total less than 10, last 11th pair is to be used for bonus frame
      */
-    private List<Integer> generateRandomRolls( int size,int upperBound){
+    private List<Integer> generateRandomRolls( int size, int upperBound){
         IntStream rolls = new Random().ints(size, 0, upperBound);
        List<Integer> ret = rolls.flatMap( r -> IntStream.of(r, new Random().nextInt(upperBound-r)))
                 .boxed().collect(toList());
@@ -169,14 +169,14 @@ class ScoreKeepingServiceIT {
      * @param expected total scores
      */
     private void testOneFrame(int i, List<Integer> pins, List<Integer> expected) throws FrameClosedException {
-        scoringService.addUpdateFrames(i, pins, 1l, boardId);
-        var bord = boardService.getUpdateBoard(1l, boardId);
+        scoringService.addUpdateFrames(i, pins, testPlayer, boardId);
+        var bord = boardService.getUpdatedBoard(testPlayer.getId(), boardId, testPlayer.getName());
          frames = bord.frameDtos();
         //bonus frame will not be added to bord, it's score will be added to the last frames, frames list will not grow longer than NUM_FRAMES
         assertThat(frames).hasSize(i);
       //  assertThat(bord.getFrames(1l)).hasSize(i);
 
-        System.out.println("Bord. frame : "+i+" score: "+bord.score());
+        System.out.println(bord);//"Bord. frame : "+i+" score: "+bord.score());
         assertThat(bord.score()).isEqualTo(expected.get(i-1));
 
     }
@@ -188,12 +188,10 @@ class ScoreKeepingServiceIT {
      * @param expected total scores
      */
     private void testBonusFrame(int i, List<Integer> pins, List<Integer> expected) throws FrameClosedException {
-       scoringService.addUpdateFrames(i, pins,1L, boardId);
-      //  var bord = boardService.getUpdateBoard(1L, boardId);
-        frames = boardService.getJsonFrames(  boardId, 1L);
+       scoringService.addUpdateFrames(i, pins, testPlayer, boardId);
+        frames = boardService.getJsonFrames(  boardId, testPlayer.getId());
         //bonus frame will not be added to bord, it's score will be added to the last frames, frames list will not grow longer than NUM_FRAMES
         assertThat(frames).hasSize(NUM_FRAMES);
-      //  assertThat(bord.getFrames(1L)).hasSize(NUM_FRAMES);
 
         System.out.println("bord total "+i+" "+boardService.getTotalScore(boardId,1L));
         assertThat(boardService.getTotalScore(boardId,1L)).isEqualTo(expected.get(i-1));

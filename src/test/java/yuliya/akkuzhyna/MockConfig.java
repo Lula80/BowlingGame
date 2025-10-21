@@ -11,7 +11,6 @@ import yuliya.akkuzhyna.service.ScoreBoard;
 import yuliya.akkuzhyna.service.ScoreBoardService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +25,7 @@ public class MockConfig {
     @Primary
     @Bean
     public ScoreKeepingService scoreKeepingService() {
-        ScoreKeepingService mock = Mockito.mock(ScoreKeepingService.class);
-        ReflectionTestUtils.setField(mock, ScoreKeepingService.Fields.finalScores, new ArrayList<Integer>());
-        return mock;
+        return Mockito.mock(ScoreKeepingService.class);
     }
 
     @Primary
@@ -38,7 +35,7 @@ public class MockConfig {
         Map<Long,ScoreBoard> boards=  HashMap.newHashMap(1);
         Long id = 0L;
         boards.put(id, new ScoreBoard(id));
-        ReflectionTestUtils.setField(mock, ScoreBoardService.Fields.boards, boards);//.mapPlayerToFrames, new HashMap<Long, List<Integer>>());
+        ReflectionTestUtils.setField(mock, ScoreBoardService.Fields.boards, boards);
         return mock;
     }
 

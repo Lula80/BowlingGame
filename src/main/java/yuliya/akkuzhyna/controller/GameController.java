@@ -31,13 +31,12 @@ public final class GameController implements GameApi {
     @PostMapping(value = "/frames/{bordId}/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
     public ResponseEntity<BoardDto>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long boardId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException {
-        //scoreKeepingService.resetBord(userId, req.getFrameIdx());
+
         var player = playerService.findPlayer(userId);
         bordService.resetBoard(boardId, userId, req.getFrameIdx());
 
-        scoreKeepingService.addUpdateFrames(req.getFrameIdx(), req.getKnockedPins(), userId, boardId);
-      //  boardService.getJsonFrames(boardId, userId);
-        return ResponseEntity.ok().body(bordService.getUpdateBoard( player.getId(), boardId));
+        scoreKeepingService.addUpdateFrames(req.getFrameIdx(), req.getKnockedPins(), player, boardId);
+        return ResponseEntity.ok().body(bordService.getUpdatedBoard( player.getId(), boardId, player.getName()));
     }
 //to move to AdminController
     @Override

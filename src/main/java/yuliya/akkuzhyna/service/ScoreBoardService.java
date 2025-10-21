@@ -13,6 +13,7 @@ import static yuliya.akkuzhyna.utils.Constants.NUM_FRAMES;
 @Service
 @FieldNameConstants
 public class ScoreBoardService implements ApplicationListener<BoardUpdateEvent> {
+
     private Map<Long,ScoreBoard> boards;
 
 
@@ -46,8 +47,8 @@ public class ScoreBoardService implements ApplicationListener<BoardUpdateEvent> 
      * @param boardId
      * @return show user , score, frames
      */
-    public BoardDto getUpdateBoard(Long userId, Long boardId ) {
-        return new BoardDto(boards.get(boardId).getTotalScore(userId), boards.get(boardId).getFrames(userId));
+    public BoardDto getUpdatedBoard(Long userId, Long boardId , String userName) {
+        return new BoardDto(boards.get(boardId).getTotalScore(userId), boards.get(boardId).getFrames(userId), userName);
     }
 
     /**

@@ -2,6 +2,7 @@ package yuliya.akkuzhyna.service;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
+import yuliya.akkuzhyna.dto.BoardDto;
 import yuliya.akkuzhyna.dto.FrameDto;
 
 import java.util.*;
@@ -45,9 +46,8 @@ public class ScoreBoardService implements ApplicationListener<BoardUpdateEvent> 
      * @param boardId
      * @return show user , score, frames
      */
-    public ScoreBoard getUpdateBoard( Long userId, Long boardId ) {
-        return boards.get(boardId);
-       
+    public BoardDto getUpdateBoard(Long userId, Long boardId ) {
+        return new BoardDto(boards.get(boardId).getTotalScore(userId), boards.get(boardId).getFrames(userId));
     }
 
     /**
@@ -62,6 +62,7 @@ public class ScoreBoardService implements ApplicationListener<BoardUpdateEvent> 
     public int getTotalScore(long boardId,long userId) {
         return  boards.get(boardId).getTotalScore(userId);
     }
+
     public void resetBoard(long bordId, long userId,  int frameId){
         if(frameId==1 || frameId > NUM_FRAMES+1) {
            ScoreBoard board = boards.get(bordId);

@@ -116,7 +116,7 @@ class ScoreKeepingServiceIT {
         for (i=0; i < rollsNum; i += ROLLS_PER_FRAME) {
             scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME), 1l,boardId);
             var bord = boardService.getUpdateBoard(1L,boardId);
-            frames = bord.getFrames(1L);
+            frames = bord.frameDtos();
             System.out.println("Bord "+ bord);
         }
 
@@ -171,13 +171,13 @@ class ScoreKeepingServiceIT {
     private void testOneFrame(int i, List<Integer> pins, List<Integer> expected) throws FrameClosedException {
         scoringService.addUpdateFrames(i, pins, 1l, boardId);
         var bord = boardService.getUpdateBoard(1l, boardId);
-         frames = bord.getFrames(1L);
+         frames = bord.frameDtos();
         //bonus frame will not be added to bord, it's score will be added to the last frames, frames list will not grow longer than NUM_FRAMES
         assertThat(frames).hasSize(i);
       //  assertThat(bord.getFrames(1l)).hasSize(i);
 
-        System.out.println("Bord. frame : "+i+" score: "+bord.getTotalScore(1l));
-        assertThat(bord.getTotalScore(1l)).isEqualTo(expected.get(i-1));
+        System.out.println("Bord. frame : "+i+" score: "+bord.score());
+        assertThat(bord.score()).isEqualTo(expected.get(i-1));
 
     }
 

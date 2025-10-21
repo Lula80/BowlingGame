@@ -31,7 +31,7 @@ public class MockConfig {
 
     @Primary
     @Bean
-    public ScoreBoardService bordService() {
+    public ScoreBoardService boardService() {
         ScoreBoardService mock = Mockito.mock(ScoreBoardService.class);
         ReflectionTestUtils.setField(mock, ScoreBoardService.Fields.boards, HashMap.newHashMap(1));//.mapPlayerToFrames, new HashMap<Long, List<Integer>>());
         return mock;

@@ -9,10 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import yuliya.akkuzhyna.dto.BoardDto;
 import yuliya.akkuzhyna.dto.PlayerDto;
 import yuliya.akkuzhyna.exception.FrameClosedException;
 import yuliya.akkuzhyna.exception.PlayerNotFoundException;
-import yuliya.akkuzhyna.service.ScoreBoard;
 
 
 import java.util.List;
@@ -30,5 +30,5 @@ sealed interface GameApi permits GameController{
     ResponseEntity<List<PlayerDto>> getAllPlayers();
 
     @PostMapping(value = "/frames/{bordI}/{userId}" , consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ScoreBoard>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long bordId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException;
+    ResponseEntity<BoardDto>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long bordId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException;
 }

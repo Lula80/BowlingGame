@@ -53,9 +53,10 @@ class GameControllerTest {
         player.setId(1L);
         player.setName("Puh");
         when(playerService.findPlayer(anyLong())).thenReturn(player);
+        doCallRealMethod().when(boardService).resetBoard(anyLong(), anyLong(), eq(1));
         doCallRealMethod().when(scoreKeepingService).addUpdateFrames(eq(1), same(List.of(5,5)),eq(1l),eq(0l));
         when(boardService.getUpdateBoard(anyLong(), anyLong())).thenCallRealMethod();
-        mockMvc.perform(post("/bowling/frames/{boardId}/{userId}", 1L,0L)
+        mockMvc.perform(post("/bowling/frames/{boardId}/{userId}", 1L,1L)
                         .content(req)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

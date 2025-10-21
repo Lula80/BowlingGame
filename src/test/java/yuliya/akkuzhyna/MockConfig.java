@@ -7,11 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.util.ReflectionTestUtils;
 import yuliya.akkuzhyna.service.PlayerService;
+import yuliya.akkuzhyna.service.ScoreBoard;
 import yuliya.akkuzhyna.service.ScoreBoardService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 @TestConfiguration
 public class MockConfig {
@@ -33,7 +35,10 @@ public class MockConfig {
     @Bean
     public ScoreBoardService boardService() {
         ScoreBoardService mock = Mockito.mock(ScoreBoardService.class);
-        ReflectionTestUtils.setField(mock, ScoreBoardService.Fields.boards, HashMap.newHashMap(1));//.mapPlayerToFrames, new HashMap<Long, List<Integer>>());
+        Map<Long,ScoreBoard> boards=  HashMap.newHashMap(1);
+        Long id = 0L;
+        boards.put(id, new ScoreBoard(id));
+        ReflectionTestUtils.setField(mock, ScoreBoardService.Fields.boards, boards);//.mapPlayerToFrames, new HashMap<Long, List<Integer>>());
         return mock;
     }
 

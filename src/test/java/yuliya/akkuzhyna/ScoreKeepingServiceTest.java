@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 import yuliya.akkuzhyna.exception.FrameClosedException;
-import yuliya.akkuzhyna.service.BordUpdateEvent;
+import yuliya.akkuzhyna.service.BoardUpdateEvent;
 import yuliya.akkuzhyna.service.Frame;
-import yuliya.akkuzhyna.service.ScoreBordService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
 
 import java.util.*;
@@ -20,12 +19,12 @@ import static org.mockito.Mockito.doNothing;
 
 class ScoreKeepingServiceTest {
     @Autowired
-    private  ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
-    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher, Mockito.mock(ScoreBordService.class));
+    private final ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher);//, Mockito.mock(ScoreBoardService.class));
 
     @BeforeEach
     void setUp() {
-       doNothing().when(eventPublisher).publishEvent(BordUpdateEvent.class);
+       doNothing().when(eventPublisher).publishEvent(BoardUpdateEvent.class);
         ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.eventPublisher, eventPublisher);
 
     }
@@ -42,7 +41,7 @@ class ScoreKeepingServiceTest {
 
         int lastClosed = scoringService.getLastClosedScore(framesQueue, generateSpare());
         assertEquals( 41, lastClosed);
-        assertEquals(framesQueue.size(), 0);
+        assertEquals(0, framesQueue.size());
     }
 
     @Test

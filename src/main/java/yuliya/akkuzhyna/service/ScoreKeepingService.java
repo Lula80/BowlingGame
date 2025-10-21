@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import yuliya.akkuzhyna.dto.FrameDto;
-import yuliya.akkuzhyna.dto.ScoreBord;
 import yuliya.akkuzhyna.exception.FrameClosedException;
 
 import java.util.*;
@@ -20,48 +19,37 @@ import static yuliya.akkuzhyna.utils.Constants.NUM_FRAMES;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ScoreKeepingService {
+public class ScoreKeepingService {// implements ApplicationEventPublisher{
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private final ScoreBordService bordService;
+  //  private final ScoreBoardService bordService;
     @Getter//for unit tests only
     private final List<Integer> finalScores = new ArrayList<>(NUM_FRAMES);
-    //for intrenal use . keeps frames with not finished score
+    //for internal use . keeps frames with not finished score
     private Queue<Frame> framesQueue = new LinkedList<>();
 
-    public void resetBord(long playerId, int i){
-        if(i==1 || i > NUM_FRAMES+1)
-            bordService.resetBord(playerId);
-    }
 
-    /**
-     * Overload or unit tests
-     */
-    public  List<FrameDto> getUpdatedFrames(int i, List<Integer> pins) throws FrameClosedException {
-        return getUpdatedFrames(i,pins, 1L);
-    }
     /**
      * @param i frames index
      * @param pins list of knocked down pins by roll of length ROLLS_PER_FRAME max
      *             Negative numbers will be classified as FOUL roll and will be reset to 0.
-     * @return list of length  NUM_FRAMES  max with the current precumputed / updates scores for each frame played
      */
-    public List<FrameDto> getUpdatedFrames(int i, List<Integer> pins, long userId) throws FrameClosedException {
+    public void addUpdateFrames(int i, List<Integer> pins, long userId, final long boardId) throws FrameClosedException {
 
-       validateState(i, pins);
+        validateState(i, pins);
         var isBonusFrame = isBonusFrame(i);
-        var pinsToDo= (isBonusFrame && !framesQueue.isEmpty())? getFinalRollsToDo() * PINS_PER_FRAME: PINS_PER_FRAME;
+        var pinsToDo = (isBonusFrame && !framesQueue.isEmpty())? getFinalRollsToDo() * PINS_PER_FRAME: PINS_PER_FRAME;
         var current = Frame.initFrame( i , pinsToDo, pins);
 
         current.addPrevClosedScore(
-                    getRecentClosedScore(framesQueue, isBonusFrame?getFinalRollsToDo():current.getRollsMade(), current.getPinsDown(), userId));
+                    getRecentClosedScore(framesQueue, isBonusFrame?getFinalRollsToDo():current.getRollsMade(), current.getPinsDown(), userId, boardId));
         framesQueue.offer(current);
 
         if(!isBonusFrame)
-            eventPublisher.publishEvent(new BordUpdateEvent( mapToDto(current), true, userId));
+            eventPublisher.publishEvent(new BoardUpdateEvent( mapToDto(current), true, userId, boardId));
 
-        return bordService.getJsonFrames(userId);
+      //  return bordService.getJsonFrames(userId);
     }
 
     private static FrameDto mapToDto(Frame current) {
@@ -87,12 +75,12 @@ public class ScoreKeepingService {
 
     /**
      * Needed for unit tests
-     * @param framesQueue
-     * @param current
-     * @return
+     * @param framesQueue frames with not completed scores
+     * @param current frame played
+     * @return  most recent completed score
      */
     public int getLastClosedScore(Queue<Frame> framesQueue, Frame current) throws FrameClosedException {
-        return getRecentClosedScore(framesQueue, current.getRollsMade(), current.getPinsDown(), 1L);
+        return getRecentClosedScore(framesQueue, current.getRollsMade(), current.getPinsDown(), 1L,0);
     }
 
 
@@ -104,7 +92,7 @@ public class ScoreKeepingService {
      * @return the first score, that was possible to finish from the queue with passed list of knocked pins
      */
 
-    private int getRecentClosedScore(Queue<Frame> framesQueue, int rollsToAdd, List <Integer> pinsDown, long userId) throws FrameClosedException {
+    private int getRecentClosedScore(Queue<Frame> framesQueue, int rollsToAdd, List <Integer> pinsDown, long userId, long boardId) throws FrameClosedException {
         var firstClosedScore = 0;
         Iterator<Frame> it = framesQueue.iterator();
         Frame f;
@@ -117,8 +105,7 @@ public class ScoreKeepingService {
             if (f.isClosed()) {
                 finalScores.add(f.printScore());
                 firstClosedScore = f.getScore();
-                eventPublisher.publishEvent(new BordUpdateEvent(mapToDto(f), false, userId));
-
+                eventPublisher.publishEvent(new BoardUpdateEvent(mapToDto(f), false, userId, boardId));
                 it.remove();
             }
         }
@@ -126,7 +113,8 @@ public class ScoreKeepingService {
         return firstClosedScore;
     }
 
-    public ScoreBord calculateTotalScore(String user, Long userId){
-      return bordService.calculateTotalScore(user, userId);
-    }
+  /*  @Override
+    public void publishEvent(ApplicationEvent event) {
+        ApplicationEventPublisher.super.publishEvent(event);
+    }*/
 }

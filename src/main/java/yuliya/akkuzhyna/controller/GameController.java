@@ -6,10 +6,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import yuliya.akkuzhyna.dto.PlayerDto;
-import yuliya.akkuzhyna.dto.ScoreBord;
 import yuliya.akkuzhyna.exception.FrameClosedException;
 import yuliya.akkuzhyna.exception.PlayerNotFoundException;
 import yuliya.akkuzhyna.service.PlayerService;
+import yuliya.akkuzhyna.service.ScoreBoard;
+import yuliya.akkuzhyna.service.ScoreBoardService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
 
 
@@ -22,17 +23,20 @@ import java.util.List;
 public final class GameController implements GameApi {
 
     private final ScoreKeepingService scoreKeepingService;
+    private  final ScoreBoardService boardService;
 
     private final PlayerService playerService;
 
+    @PostMapping(value = "/frames/{bordId}/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    @PostMapping(value = "/frames/{userId}" , consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ScoreBord>  scorePlayedFrames(@PathVariable("userId") long userId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException {
-       scoreKeepingService.resetBord(userId, req.getFrameIdx());
+    public ResponseEntity<ScoreBoard>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long boardId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException {
+        //scoreKeepingService.resetBord(userId, req.getFrameIdx());
         var player = playerService.findPlayer(userId);
-       scoreKeepingService.getUpdatedFrames(req.getFrameIdx(), req.getKnockedPins(), userId);
+        boardService.resetBoard(boardId, userId, req.getFrameIdx());
 
-       return ResponseEntity.ok().body(scoreKeepingService.calculateTotalScore(player.getName(), player.getId()));
+        scoreKeepingService.addUpdateFrames(req.getFrameIdx(), req.getKnockedPins(), userId, boardId);
+        boardService.getJsonFrames(boardId, userId);
+        return ResponseEntity.ok().body(boardService.getUpdateBoard( player.getId(), boardId));
     }
 //to move to AdminController
     @Override

@@ -9,7 +9,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import yuliya.akkuzhyna.dto.FrameDto;
 import yuliya.akkuzhyna.exception.FrameClosedException;
 import yuliya.akkuzhyna.service.Frame;
-import yuliya.akkuzhyna.service.ScoreBordService;
+import yuliya.akkuzhyna.service.ScoreBoardService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
 
 import java.util.*;
@@ -21,24 +21,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static yuliya.akkuzhyna.utils.Constants.*;
 
-@SpringBootTest(classes={ScoreKeepingService.class, ScoreBordService.class, ApplicationEventPublisher.class})
+@SpringBootTest(classes={ScoreKeepingService.class, ScoreBoardService.class, ApplicationEventPublisher.class})
 class ScoreKeepingServiceIT {
 
-    private List<Integer> result = new ArrayList<>(12);
     private List<FrameDto> frames = new ArrayList<>(12);
     @Autowired
-    private  ScoreBordService bordService;
+    private  ScoreBoardService boardService;
     @Autowired
     private  ApplicationEventPublisher eventPublisher;
-    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher, bordService);
-
+    private final ScoreKeepingService scoringService = new ScoreKeepingService(eventPublisher);//, boardService);
+    private final long boardId = 0L;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.bordService, bordService);
+   //     ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.boardService, bordService);
         ReflectionTestUtils.setField(scoringService, ScoreKeepingService.Fields.eventPublisher, eventPublisher);
-        bordService.resetBord(1L);
-        result.clear();
+        boardService.resetBoard(boardId,1l, 1);
     }
 
     @Test
@@ -54,7 +52,7 @@ class ScoreKeepingServiceIT {
 
     @Test
     void testInvalidFrameState2() {
-        assertThrows(IndexOutOfBoundsException.class, () -> scoringService.getUpdatedFrames(13, List.of(3, 5)));
+        assertThrows(IndexOutOfBoundsException.class, () -> scoringService.addUpdateFrames(13, List.of(3, 5), 0l,1l));
     }
 
     @Test
@@ -116,15 +114,16 @@ class ScoreKeepingServiceIT {
         var rollsNum = NUM_FRAMES * ROLLS_PER_FRAME;
         int i;
         for (i=0; i < rollsNum; i += ROLLS_PER_FRAME) {
-            frames = scoringService.getUpdatedFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME));
-            var bord = bordService.calculateTotalScore("Test player", 1L);
+            scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME), 1l,boardId);
+            var bord = boardService.getUpdateBoard(1L,boardId);
+            frames = bord.getFrames(1L);
             System.out.println("Bord "+ bord);
         }
 
         if(!frames.getLast().isClosed()){
-            frames = scoringService.getUpdatedFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME));
-            var bord = bordService.calculateTotalScore("Test player", 1L);
-            System.out.println("Bord "+ bord);
+            scoringService.addUpdateFrames(i / ROLLS_PER_FRAME + 1, input.subList(i, i + ROLLS_PER_FRAME),1l, boardId);
+            var bord = boardService.getUpdateBoard(1L, boardId);
+            System.out.println("Board "+ bord);
         }
 
 
@@ -170,14 +169,15 @@ class ScoreKeepingServiceIT {
      * @param expected total scores
      */
     private void testOneFrame(int i, List<Integer> pins, List<Integer> expected) throws FrameClosedException {
-        frames = scoringService.getUpdatedFrames(i, pins);
-        var bord = bordService.calculateTotalScore("Test player", 1L);
+        scoringService.addUpdateFrames(i, pins, 1l, boardId);
+        var bord = boardService.getUpdateBoard(1l, boardId);
+         frames = bord.getFrames(1L);
         //bonus frame will not be added to bord, it's score will be added to the last frames, frames list will not grow longer than NUM_FRAMES
         assertThat(frames).hasSize(i);
-        assertThat(bord.getFrames()).hasSize(i);
+      //  assertThat(bord.getFrames(1l)).hasSize(i);
 
-        System.out.println("bord total "+i+" "+bord.getTotalScore());
-        assertThat(bord.getTotalScore()).isEqualTo(expected.get(i-1));
+        System.out.println("Bord. frame : "+i+" score: "+bord.getTotalScore(1l));
+        assertThat(bord.getTotalScore(1l)).isEqualTo(expected.get(i-1));
 
     }
 
@@ -188,14 +188,15 @@ class ScoreKeepingServiceIT {
      * @param expected total scores
      */
     private void testBonusFrame(int i, List<Integer> pins, List<Integer> expected) throws FrameClosedException {
-        frames = scoringService.getUpdatedFrames(i, pins);
-        var bord = bordService.calculateTotalScore("Test player", 1L);
+       scoringService.addUpdateFrames(i, pins,1L, boardId);
+      //  var bord = boardService.getUpdateBoard(1L, boardId);
+        frames = boardService.getJsonFrames(  boardId, 1L);
         //bonus frame will not be added to bord, it's score will be added to the last frames, frames list will not grow longer than NUM_FRAMES
         assertThat(frames).hasSize(NUM_FRAMES);
-        assertThat(bord.getFrames()).hasSize(NUM_FRAMES);
+      //  assertThat(bord.getFrames(1L)).hasSize(NUM_FRAMES);
 
-        System.out.println("bord total "+i+" "+bord.getTotalScore());
-        assertThat(bord.getTotalScore()).isEqualTo(expected.get(i-1));
+        System.out.println("bord total "+i+" "+boardService.getTotalScore(boardId,1L));
+        assertThat(boardService.getTotalScore(boardId,1L)).isEqualTo(expected.get(i-1));
 
     }
 

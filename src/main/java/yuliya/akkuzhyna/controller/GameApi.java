@@ -1,16 +1,18 @@
 package yuliya.akkuzhyna.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import yuliya.akkuzhyna.dto.PlayerDto;
-import yuliya.akkuzhyna.dto.ScoreBord;
 import yuliya.akkuzhyna.exception.FrameClosedException;
 import yuliya.akkuzhyna.exception.PlayerNotFoundException;
+import yuliya.akkuzhyna.service.ScoreBoard;
 
 
 import java.util.List;
@@ -27,14 +29,6 @@ sealed interface GameApi permits GameController{
     })
     ResponseEntity<List<PlayerDto>> getAllPlayers();
 
-    @Operation(
-            summary = "calculates score for the frames passen in request",
-            description = "")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successfully added score"),
-            @ApiResponse(responseCode = "404", description = "player is not found in database")
-    })
-    ResponseEntity<ScoreBord> scorePlayedFrames(@Parameter(name = "userId", example = "1") long userId,
-                                                @RequestBody(required = true, description = "request data for score computation") ScoreReq req)
-            throws PlayerNotFoundException, FrameClosedException;
+    @PostMapping(value = "/frames/{bordI}/{userId}" , consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ScoreBoard>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long bordId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException;
 }

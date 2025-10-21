@@ -14,12 +14,12 @@ public class ScoreReq {
 
     @Schema(
             name = "frameIdx",
-            description = "current frame's index strting from 1, incremented by 1",
+            description = "current frame's index starting from 1, incremented by 1",
             requiredMode =  Schema.RequiredMode.REQUIRED,
             example = "1")
     private int frameIdx;
     @Schema(
-            description = "list of  number os pins knocked down by each roll",
+            description = "list of  number of pins knocked down by each roll",
             example = "[8,1]")
     private List<Integer> knockedPins;
 }

@@ -12,11 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import yuliya.akkuzhyna.MockConfig;
 import yuliya.akkuzhyna.persistence.Player;
 import yuliya.akkuzhyna.service.PlayerService;
+import yuliya.akkuzhyna.service.ScoreBoardService;
 import yuliya.akkuzhyna.service.ScoreKeepingService;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -35,6 +37,8 @@ class GameControllerTest {
     @Autowired
     private PlayerService playerService;
     @Autowired
+    private ScoreBoardService boardService;
+    @Autowired
     private MockMvc mockMvc;
 
 
@@ -49,9 +53,9 @@ class GameControllerTest {
         player.setId(1L);
         player.setName("Puh");
         when(playerService.findPlayer(anyLong())).thenReturn(player);
-        when(scoreKeepingService.getUpdatedFrames(eq(1), same(List.of(5,5)))).thenCallRealMethod();
-        when(scoreKeepingService.calculateTotalScore(anyString(), anyLong())).thenCallRealMethod();
-        mockMvc.perform(post("/bowling/frames/{userId}", 1L)
+        doCallRealMethod().when(scoreKeepingService).addUpdateFrames(eq(1), same(List.of(5,5)),eq(1l),eq(0l));
+        when(boardService.getUpdateBoard(anyLong(), anyLong())).thenCallRealMethod();
+        mockMvc.perform(post("/bowling/frames/{boardId}/{userId}", 1L,0L)
                         .content(req)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

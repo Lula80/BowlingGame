@@ -5,7 +5,7 @@ https://en.wikipedia.org/wiki/Ten-pin_bowling#Pins_and_scoring
 http://localhost:8080/bowling-api/swagger-ui/index.html
 
 To test a perfect game (gaining maximum score) post subsequently 11 times
-http://localhost:8080/bowling-api/bowling/frames/1
+http://localhost:8080/bowling-api/bowling/frames/1/1
 
 with the following JSON request body:
 {"frameIdx":1,

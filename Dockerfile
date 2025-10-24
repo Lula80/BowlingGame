@@ -6,7 +6,9 @@ RUN gradle build --no-daemon
 FROM openjdk:21-slim
 
 EXPOSE 8080
-
+RUN groupadd -r myuser && useradd -r -g myuser myuser
+#    <HERE DO WHAT YOU HAVE TO DO AS A ROOT USER LIKE INSTALLING PACKAGES ETC.>
+USER myuser
 RUN mkdir /app
 
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/Bowling.jar

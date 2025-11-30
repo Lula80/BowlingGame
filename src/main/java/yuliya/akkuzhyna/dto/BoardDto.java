@@ -4,4 +4,4 @@ import java.util.List;
 
 public record BoardDto (int score,
     List<FrameDto> frameDtos
-, String user){}
+, String player){}

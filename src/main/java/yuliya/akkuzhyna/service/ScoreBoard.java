@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 /**
- * API's response about user's played frames
+ * API's response about player's played frames
  */
 @Data
 public class ScoreBoard {
@@ -27,27 +27,27 @@ public class ScoreBoard {
        return mapPlayerToFrames.get(playerId).add(newFrame);
     }
 
-    public void clear(long userId) {
+    public void clear(long playerId) {
         mapPlayerToFrames.clear();
-        mapPlayerToFrames.put(userId, new ArrayList<>(Constants.NUM_FRAMES));
+        mapPlayerToFrames.put(playerId, new ArrayList<>(Constants.NUM_FRAMES));
         mapPlayerToScore.clear();
     }
 
-    public void updatePrevFrameOnBord(FrameDto f, Long userId) {
-        FrameDto frameDto = mapPlayerToFrames.get(userId).get(f.getIndex()-1);
+    public void updatePrevFrameOnBord(FrameDto f, Long playerId) {
+        FrameDto frameDto = mapPlayerToFrames.get(playerId).get(f.getIndex()-1);
         frameDto.setClosed(f.isClosed());
         frameDto.setScore(f.getScore());
     }
 
-    public int getTotalScore( long userId) {
-        return mapPlayerToScore.getOrDefault(userId,0);
+    public int getTotalScore( long playerId) {
+        return mapPlayerToScore.getOrDefault(playerId,0);
     }
 
-    public List<FrameDto> getFrames(Long userId) {
-       return mapPlayerToFrames.get(userId);
+    public List<FrameDto> getFrames(Long playerId) {
+       return mapPlayerToFrames.get(playerId);
     }
 
-    public void updateCurrentClosedCore(Long userId, int score) {
-        mapPlayerToScore.put(userId, score);
+    public void updateCurrentClosedCore(Long playerId, int score) {
+        mapPlayerToScore.put(playerId, score);
     }
 }

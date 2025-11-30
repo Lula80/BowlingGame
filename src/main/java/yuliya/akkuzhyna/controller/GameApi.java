@@ -29,6 +29,6 @@ sealed interface GameApi permits GameController{
     })
     ResponseEntity<List<PlayerDto>> getAllPlayers();
 
-    @PostMapping(value = "/frames/{bordI}/{userId}" , consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<BoardDto>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long bordId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException;
+    @PostMapping(value = "/frames/{bordI}/{playerId}" , consumes = MediaType.APPLICATION_JSON_VALUE,  produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BoardDto>  scorePlayedFrames(@PathVariable("playerId") long playerId, @PathVariable("bordId") long bordId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException;
 }

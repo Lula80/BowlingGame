@@ -28,12 +28,12 @@ public final class GameController implements GameApi {
 
     private final PlayerService playerService;
 
-    @PostMapping(value = "/frames/{bordId}/{userId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/frames/{bordId}/{playerId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Override
-    public ResponseEntity<BoardDto>  scorePlayedFrames(@PathVariable("userId") long userId, @PathVariable("bordId") long boardId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException {
+    public ResponseEntity<BoardDto>  scorePlayedFrames(@PathVariable("playerId") long playerId, @PathVariable("bordId") long boardId, @RequestBody ScoreReq req) throws PlayerNotFoundException, FrameClosedException {
 
-        var player = playerService.findPlayer(userId);
-        bordService.resetBoard(boardId, userId, req.getFrameIdx());
+        var player = playerService.findPlayer(playerId);
+        bordService.resetBoard(boardId, playerId, req.getFrameIdx());
 
         scoreKeepingService.addUpdateFrames(req.getFrameIdx(), req.getKnockedPins(), player, boardId);
         return ResponseEntity.ok().body(bordService.getUpdatedBoard( player.getId(), boardId, player.getName()));

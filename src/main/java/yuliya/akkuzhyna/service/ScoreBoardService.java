@@ -27,7 +27,7 @@ public class ScoreBoardService implements ApplicationListener<BoardUpdateEvent> 
     /**
      *  processes two types of events:
      *  1. new frame
-     *  2. rescore previous frame
+     *  2. re-score previous frame
      * @param event the event to respond to
      */
     @Override
@@ -43,31 +43,31 @@ public class ScoreBoardService implements ApplicationListener<BoardUpdateEvent> 
 
     /**
      *
-     * @param userId
+     * @param playerId
      * @param boardId
-     * @return show user , score, frames
+     * @return show player , score, frames
      */
-    public BoardDto getUpdatedBoard(Long userId, Long boardId , String userName) {
-        return new BoardDto(boards.get(boardId).getTotalScore(userId), boards.get(boardId).getFrames(userId), userName);
+    public BoardDto getUpdatedBoard(Long playerId, Long boardId , String playerName) {
+        return new BoardDto(boards.get(boardId).getTotalScore(playerId), boards.get(boardId).getFrames(playerId), playerName);
     }
 
     /**
      * @param boardId
-     * @param userId
+     * @param playerId
      * @return list of length  NUM_FRAMES  max with the current precomputed / updated scores for each frame played
      */
-    public List<FrameDto> getJsonFrames( long boardId, long userId) {
-        return boards.get(boardId).getFrames(userId);
+    public List<FrameDto> getJsonFrames( long boardId, long playerId) {
+        return boards.get(boardId).getFrames(playerId);
     }
 
-    public int getTotalScore(long boardId,long userId) {
-        return  boards.get(boardId).getTotalScore(userId);
+    public int getTotalScore(long boardId,long playerId) {
+        return  boards.get(boardId).getTotalScore(playerId);
     }
 
-    public void resetBoard(long bordId, long userId,  int frameId){
+    public void resetBoard(long bordId, long playerId,  int frameId){
         if(frameId==1 || frameId > NUM_FRAMES+1) {
            ScoreBoard board = boards.get(bordId);
-            board.clear(userId);
+            board.clear(playerId);
         }
     }
 }

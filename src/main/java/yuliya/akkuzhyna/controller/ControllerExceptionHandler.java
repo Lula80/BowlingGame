@@ -19,12 +19,12 @@ import yuliya.akkuzhyna.exception.PlayerNotFoundException;
 public class ControllerExceptionHandler {
 
     @ExceptionHandler(PlayerNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFoundException(PlayerNotFoundException ex, WebRequest request) {
+    public ResponseEntity<?> handlePlayerNotFoundException(PlayerNotFoundException ex, WebRequest request) {
         return new ResponseEntity<>(new ErrorDetails(ex.getMessage(), request.getDescription(false)), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(FrameClosedException.class)
-    public ResponseEntity<?> handleUserNotFoundException(FrameClosedException ex, WebRequest request) {
+    public ResponseEntity<?> handlePlayerNotFoundException(FrameClosedException ex, WebRequest request) {
         return new ResponseEntity<>(new ErrorDetails(ex.getMessage(), request.getDescription(false)), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

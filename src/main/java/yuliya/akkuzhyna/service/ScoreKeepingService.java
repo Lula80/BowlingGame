@@ -24,10 +24,6 @@ public class ScoreKeepingService {
     private final ApplicationEventPublisher eventPublisher;
 
 
-    //for internal use . keeps frames with not finished score
-
-
-
     /**
      * @param i frames index
      * @param pins list of knocked down pins by roll of length ROLLS_PER_FRAME max

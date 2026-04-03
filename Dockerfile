@@ -3,14 +3,16 @@ COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle build --no-daemon
 
-FROM openjdk:21-slim
+FROM eclipse-temurin:21
 
 EXPOSE 8080
 RUN groupadd -r myuser && useradd -r -g myuser myuser
 #    <HERE DO WHAT YOU HAVE TO DO AS A ROOT USER LIKE INSTALLING PACKAGES ETC.>
-USER myuser
+#USER myuser
 RUN mkdir /app
-
+RUN chown myuser /app
+USER myuser
+WORKDIR /app
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/Bowling.jar
 #export SERVER_SERVLET_CONTEXT_PATH=/baeldung
 ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-Djava.security.egd=file:/dev/./urandom","-jar","/app/Bowling.jar"]

@@ -3,10 +3,7 @@ version: '3.8'
 services:
         psql-db:
                 image: 'postgres:17-alpine'
-                container_name: psql-db
-                securityContext:
-                        capabilities:
-                                drop: [ "NET_RAW" ]
+                container_name: psql-d
                 volumes:
                        - /var/lib/postgresql/data
                        # - d:/test/pgpersist:/postgres_data:/var/lib/postgresql/data/
@@ -41,9 +38,7 @@ services:
                         - psql-db
         pgadmin:
                 image: dpage/pgadmin4:8.12.0
-                securityContext:
-                        capabilities:
-                                drop: [ "NET_RAW" ]
+
                 restart: "no"
                 ports:
                         - "5050:80"

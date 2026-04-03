@@ -3,6 +3,7 @@ package yuliya.akkuzhyna.persistence;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import yuliya.akkuzhyna.service.Frame;
 
 import java.util.ArrayList;
@@ -16,11 +17,12 @@ import static yuliya.akkuzhyna.utils.Constants.NUM_FRAMES;
 @Entity
 @Table(name = "player", schema = "bowling_club")
 @JsonIgnoreProperties(value = { "id" })
+@NoArgsConstructor
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private final Long id;
+    private  Long id;
 
     private String name;
     @Transient

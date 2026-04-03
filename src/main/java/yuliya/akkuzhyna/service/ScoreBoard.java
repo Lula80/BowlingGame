@@ -2,13 +2,12 @@ package yuliya.akkuzhyna.service;
 
 import lombok.Data;
 import lombok.Getter;
+import org.hibernate.mapping.Collection;
 import yuliya.akkuzhyna.dto.FrameDto;
 import yuliya.akkuzhyna.utils.Constants;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 /**
  * API's response about player's played frames
  */
@@ -27,7 +26,7 @@ public class ScoreBoard {
        return mapPlayerToFrames.get(playerId).add(newFrame);
     }
 
-    public void clear(long playerId) {
+    void clear(long playerId) {
         mapPlayerToFrames.clear();
         mapPlayerToFrames.put(playerId, new ArrayList<>(Constants.NUM_FRAMES));
         mapPlayerToScore.clear();
